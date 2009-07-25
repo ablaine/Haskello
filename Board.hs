@@ -1,10 +1,10 @@
-module Board
+{-module Board
 ( State(..), Board, Point, Move
 , board_bounds
 , board_size
 , othelloBoard
 , makeMove
-) where
+) where-}
 
 import Data.Array
 
@@ -88,11 +88,30 @@ pp board = do putStr "  0 1 2 3 4 5 6 7\n"; mapM_ (\(a,b) -> rowToStr a b) (zip 
 
 
 main :: IO ()
-main = do
-	pp othelloBoard;
-	putStr "Dark: Please make your move\n";
-	move <- getLine;
-	pp (hmm (map read (words move)::[Int]));
-	putStr "Done!\n"
+main = play othelloBoard
 
-hmm lst = makeMove (((lst !! 0),(lst !! 1)), X) othelloBoard;
+play :: Board -> IO a
+play board = do
+	pp board
+	move <- getInput "Dark"
+	pp (makeMove (move,X) board)
+	otherMove <- getInput "Light"
+	play (makeMove (otherMove,O) (makeMove(move,X) board))
+	
+--TODO: Make sure the input will make an effect on the board.
+getInput :: String -> IO Point
+getInput p = do
+	putStr (p ++ "'s move[ x y ]: ")
+	move <- getLine
+	if withinBounds (parseInput move)
+		then return (parseInput move)
+		else getInput p
+
+parseInput :: String -> Point
+parseInput str = (lst !! 0, lst !! 1)
+	where
+		lst = map read (words str)::[Int]
+
+{-
+getInput should parse for exit or quit type stuff...
+-}
