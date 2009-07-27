@@ -1,30 +1,15 @@
 module Board
-( State(..)
-, Board
-, Point
-, Move
-, board_bounds
-, board_size
-, othelloBoard
+( board_bounds, board_size, othelloBoard
 , makeMove
-, defaultGame
+, withinBounds
+, getState
+, isValidMove
 ) where
 
-import System.IO
 import Data.Array
-import System.Cmd
 
-{--- TODO ---
-getInput should parse for exit or quit type stuff...
-
--}
-
-data State = X | O | E
-	deriving (Eq, Enum, Show, Bounded)
-
-type Board = Array Int (Array Int State)
-type Point = (Int, Int)
-type Move = (Point, State)
+import Utils
+import DataTypes
 
 {-- Constants --}
 board_bounds = (0, 7)
@@ -46,10 +31,10 @@ getFlipped m@(p,s) b = if null result then [] else p:result
 	where
 		result = concat $ map followInit $ listOfValidDir m b
 			where
-				followInit d = follow (addPoints p d) []
+				followInit d = follow (addPair p d) []
 					where
 						follow p lst
-							| withinBounds p && getState p b == (oppState s) = follow (addPoints p d) (p:lst)
+							| withinBounds p && getState p b == (oppState s) = follow (addPair p d) (p:lst)
   							| getState p b == s = lst
 							| otherwise = []
 
@@ -59,7 +44,7 @@ listOfValidDir (p,s) b = filter isValidDir listOfDir
 		listOfDir = [ (a,b) | a <- [-1,0,1], b <- [-1,0,1], a /= 0 || b /= 0 ]
 		isValidDir d = withinBounds p' && getState p' b == (oppState s)
 			where
-				p' = addPoints p d
+				p' = addPair p d
 
 flipMult :: [Point] -> State -> Board -> Board
 flipMult [] _ b = b
@@ -75,68 +60,6 @@ withinBounds (x, y) = check x && check y
 getState :: Point -> Board -> State
 getState (x, y) b = b ! y ! x
 
-{-- Utilities --}
-mkArray :: (Ix a) => (a -> b) -> (a,a) -> Array a b
-mkArray f bnds = array bnds [(i, f i) | i <- range bnds]
-
-addPoints :: Point -> Point -> Point
-addPoints = (\(a,b) (c,d) -> (a+c, b+d))
-
-oppState :: State -> State
-oppState X = O
-oppState O = X
-oppState _ = error "oppState called on E (Empty)!"
-
-pp :: Board -> IO ()
-pp board = do
-	putStr "  0 1 2 3 4 5 6 7\n"
-	mapM_ (\(a,b) -> rowToStr a b) $ zip (indices board) (elems board)
-	where
-		rowToStr index row = do
-			putStr $ show index
-			mapM_ putStr $ map (\a -> if a == "E" then " ." else " " ++ a) (map show $ elems row)
-			putStr "\n"
-
-main :: IO ()
-main = play othelloBoard
-
-defaultGame :: IO ()
-defaultGame = play othelloBoard
-
-play :: Board -> IO a
-play board = do
-	system "clear"
-	pp board
-	move <- getValidInput X board "Dark"
-	system "clear"
-	pp $ makeMove (move,X) board
-	otherMove <- getValidInput O board "Light"
-	play $ makeMove (otherMove, O) $ makeMove (move, X) board
-	
-getValidInput :: State -> Board -> String -> IO Point
-getValidInput s b string = do
-	test <- getInput string
-	if isValidMove s b test
-		then return test
-		else do
-			putStr "Sorry, please choose a valid move.\n"
-			getValidInput s b string
-	where
-		isValidMove :: State -> Board -> Point -> Bool
-		isValidMove s b m = 0 < length (take 1 $ getFlipped (m,s) b)
-		getInput :: String -> IO Point
-		getInput p = do
-			putStr $ p ++ "'s move[ x y ]: "
-			hFlush stdout {- Forcibly flush buffer for compiled version -}
-			move <- getLine
-			if withinBounds $ parseInput move
-				then return $ parseInput move
-				else do
-					putStr "Sorry, please choose two indicies in the range [0,7]\n"
-					getInput p
-			where
-				parseInput :: String -> Point
-				parseInput str = (lst !! 0, lst !! 1)
-					where
-						lst = map read $ words str::[Int]
+isValidMove :: Board -> Move -> Bool
+isValidMove board move = length (take 1 $ getFlipped move board) > 0
 
