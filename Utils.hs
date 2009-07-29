@@ -1,6 +1,7 @@
 module Utils where
 
 import Data.Array
+import Control.Arrow
 
 import DataTypes
 
@@ -14,12 +15,13 @@ mkArray f bnds = array bnds [(i, f i) | i <- range bnds]
 elems2D :: (Ix i, Ix a) => Array a (Array i e) -> [[e]]
 elems2D arr = map (\i -> elems $ arr ! i) . range $ bounds arr
 
+--NOTE: These two are currently unusued
 -- Allows map like transformations on the elements in the array while leaving the array structure intact
 mapArray :: (Ix i) => (a -> b) -> Array i a -> Array i b
-mapArray f arr = array (bounds arr) $ map (\(i,e) -> (i,f e)) $ assocs arr
+mapArray f arr = array (bounds arr) $ map (second f) $ assocs arr
 
---mapArray2D :: (Ix (Array i a), Ix i) => (a -> b) -> Array (Array i a) e -> Array (Array i a) (Array i b) --NOTE: Compiler complains when type is visible..
-mapArray2D f board = array (bounds board) $ map (\(i,e) -> (i,mapArray f i)) $ assocs board
+mapArray2D :: (Ix i, Ix i1) => (a -> b) -> Array i (Array i1 a) -> Array i (Array i1 b)
+mapArray2D f board = array (bounds board) $ map (second (mapArray f)) $ assocs board
 
 {- State -}
 oppState :: State -> State

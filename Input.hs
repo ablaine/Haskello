@@ -36,7 +36,7 @@ parseInput = do
 					if withinBounds move
 						then return move
 						else do
-							putStrLn $ "Sorry, your move " ++ (show move) ++ " is out of bounds. [0,7]"
+							putStrLn $ "Sorry, your move " ++ show move ++ " is out of bounds. [0,7]"
 							parseInput
 				else do
 					putStrLn "Need two NUMBERS!"

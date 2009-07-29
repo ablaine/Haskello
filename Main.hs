@@ -18,14 +18,14 @@ play :: GameState -> IO a
 play env = do
 	let b = board env
 	let s = curTurn env
-	let dPts = "X: " ++ (show $ darkPts env)
-	let lPts = "O: " ++ (show $ lightPts env)
-	let tPts = "T: " ++ (show $ totalPts env)
-	let bPrint = (showBoard b) ++ ["",dPts ++ "\t" ++ lPts ++ "\t" ++ tPts]
+	let dPts = "X: " ++ show (darkPts env)
+	let lPts = "O: " ++ show (lightPts env)
+	let tPts = "T: " ++ show (totalPts env)
+	let bPrint = showBoard b ++ ["",dPts ++ "\t" ++ lPts ++ "\t" ++ tPts]
 	system "clear"
 	putStrLn header
 	putStrArr bPrint --Print the board
-	putStr $ "\nPlease make your move " ++ (stateToStr s) ++ ": "
+	putStr $ "\nPlease make your move " ++ stateToStr s ++ ": "
 	move <- getNextMove s b
 	let board' = makeMove (move, s) b
 	let nextTurn = oppState s
