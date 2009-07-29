@@ -4,32 +4,40 @@ module Board
 , withinBounds
 , getState
 , isValidMove
+, points
 ) where
 
+import Data.Ix
 import Data.Array
 
 import Utils
 import DataTypes
 
+
+test (low, high) n = low < n && n > high
+
+
 {-- Constants --}
 board_bounds = (0, 7)
-board_size = 8
+board_size = rangeSize board_bounds
 
 othelloBoard :: Board
 othelloBoard = flipMult [(3,3),(4,4)] O (flipMult [(3,4),(4,3)] X blankBoard)
 	where
-		blankBoard = mkArray (\_ -> row) board_bounds
-			where
-				row = mkArray (\_ -> E) board_bounds
+		blankBoard = mkArray $ mkArray E
+		mkArray = listArray board_bounds . replicate board_size
 
 {-- Manipulating the board --}
+points :: State -> Board -> Int
+points state = length . filter (==state) . concat . elems2D
+
 makeMove :: Move -> Board -> Board
 makeMove m@(_,s) b = flipMult (getFlipped m b) s b
 
 getFlipped :: Move -> Board -> [Point]
 getFlipped m@(p,s) b = if null result then [] else p:result
 	where
-		result = concat $ map followInit $ listOfValidDir m b
+		result = concatMap followInit $ listOfValidDir m b
 			where
 				followInit d = follow (addPair p d) []
 					where
@@ -55,7 +63,7 @@ flipMult (x:xs) val b = flipMult xs val $ flipSingle x val b
 withinBounds :: Point -> Bool
 withinBounds (x, y) = check x && check y
 	where
-		check = (\n -> 0 <= n && n < board_size)
+		check = inRange board_bounds
 
 getState :: Point -> Board -> State
 getState (x, y) b = b ! y ! x
