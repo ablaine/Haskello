@@ -19,8 +19,9 @@ board_size = rangeSize board_bounds
 
 othelloBoard :: Board
 othelloBoard = flipMult [(3,3),(4,4)] O (flipMult [(3,4),(4,3)] X blankBoard)
+
+blankBoard = mkArray $ mkArray E
 	where
-		blankBoard = mkArray $ mkArray E
 		mkArray = listArray board_bounds . replicate board_size
 
 {-- Manipulating the board --}
@@ -39,13 +40,14 @@ getFlipped m@(p,s) b = if null result then [] else p:result
 					where
 						follow p lst
 							| withinBounds p && getState p b == oppState s = follow (addPair p d) (p:lst)
-  							| getState p b == s = lst
+							| withinBounds p && getState p b == s = lst
 							| otherwise = []
+
+listOfDir = [ (a,b) | a <- [-1,0,1], b <- [-1,0,1], a /= 0 || b /= 0 ]
 
 listOfValidDir :: Move -> Board -> [Point]
 listOfValidDir (p,s) b = filter isValidDir listOfDir
 	where
-		listOfDir = [ (a,b) | a <- [-1,0,1], b <- [-1,0,1], a /= 0 || b /= 0 ]
 		isValidDir d = withinBounds p' && getState p' b == oppState s
 			where
 				p' = addPair p d
