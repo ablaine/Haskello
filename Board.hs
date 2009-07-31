@@ -24,6 +24,8 @@ blankBoard = mkArray $ mkArray E
 	where
 		mkArray = listArray board_bounds . replicate board_size
 
+listOfDir = [ (a,b) | a <- [-1,0,1], b <- [-1,0,1], a /= 0 || b /= 0 ]
+
 {-- Manipulating the board --}
 points :: State -> Board -> Int
 points state = length . filter (==state) . concat . elems2D
@@ -43,8 +45,6 @@ getFlipped m@(p,s) b = if null result then [] else p:result
 							| withinBounds p && getState p b == s = lst
 							| otherwise = []
 
-listOfDir = [ (a,b) | a <- [-1,0,1], b <- [-1,0,1], a /= 0 || b /= 0 ]
-
 listOfValidDir :: Move -> Board -> [Point]
 listOfValidDir (p,s) b = filter isValidDir listOfDir
 	where
@@ -54,9 +54,12 @@ listOfValidDir (p,s) b = filter isValidDir listOfDir
 
 flipMult :: [Point] -> State -> Board -> Board
 flipMult [] _ b = b
-flipMult (x:xs) val b = flipMult xs val $ flipSingle x val b
+flipMult (x:xs) val b = flipMult xs val $ flipSingle b val x
+
+flipSingle :: Board -> State -> Point -> Board
+flipSingle b val (x, y) = b // [(y,row)]
 	where
-		flipSingle (x, y) val b = b // [(y,((b ! y) // [(x,val)]))]
+		row = b ! y // [(x,val)]
 
 withinBounds :: Point -> Bool
 withinBounds (x, y) = check x && check y
@@ -66,6 +69,6 @@ withinBounds (x, y) = check x && check y
 getState :: Point -> Board -> State
 getState (x, y) b = b ! y ! x
 
-isValidMove :: Board -> Move -> Bool
-isValidMove board move = length (take 1 $ getFlipped move board) > 0
+isValidMove :: Move -> Board -> Bool
+isValidMove move = not . null . getFlipped move
 

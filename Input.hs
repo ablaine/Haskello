@@ -10,7 +10,7 @@ import Board
 getNextMove :: State -> Board -> IO Point
 getNextMove s b = do
 	move <- parseInput
-	if isValidMove b (move, s)
+	if isValidMove (move, s) b
 		then return move
 		else do
 			putStrLn "Sorry, please choose a valid move."
