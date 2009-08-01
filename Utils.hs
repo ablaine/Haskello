@@ -2,7 +2,6 @@ module Utils where
 
 import System.Cmd
 import Data.Array
-import Control.Arrow
 
 import DataTypes
 
@@ -16,13 +15,15 @@ mkArray f bnds = array bnds [(i, f i) | i <- range bnds]
 elems2D :: (Ix i, Ix a) => Array a (Array i e) -> [[e]]
 elems2D arr = map (\i -> elems $ arr ! i) . range $ bounds arr
 
---NOTE: These two are currently unusued
--- Allows map like transformations on the elements in the array while leaving the array structure intact
-mapArray :: (Ix i) => (a -> b) -> Array i a -> Array i b
-mapArray f arr = array (bounds arr) $ map (second f) $ assocs arr
+-- Performs 'map' over an array. Function expects the tuple (index,value) but should only return the new value.
+mapArray :: (Ix i) => ((i, a) -> b) -> Array i a -> Array i b
+mapArray f arr = array (bounds arr) $ map (\(index,value) -> (index,f (index,value))) $ assocs arr
 
-mapArray2D :: (Ix i, Ix i1) => (a -> b) -> Array i (Array i1 a) -> Array i (Array i1 b)
-mapArray2D f board = array (bounds board) $ map (second (mapArray f)) $ assocs board
+-- Similar to mapArray except performed on a 2d array of arrays. Function expects ((x,y),value) but you should only return the new value.
+mapArray2D :: (Ix i) => (((i, i), a) -> b) -> Array i (Array i a) -> Array i (Array i b)
+mapArray2D f arr = array (bounds arr) $ map (\(x,rArr) -> (x,handleRow (x,rArr))) $ assocs arr
+	where
+		handleRow (x,rArr) = array (bounds rArr) $ map (\(y,value) -> (y,f ((x,y),value))) $ assocs rArr
 
 {- State -}
 oppState :: State -> State
