@@ -70,5 +70,9 @@ getState :: Point -> Board -> State
 getState (x, y) b = b ! y ! x
 
 isValidMove :: Move -> Board -> Bool
-isValidMove move = not . null . getFlipped move
+isValidMove move board = open && flips
+	where
+		open = (\(m,s) -> getState m board == E) move
+		flips = not . null $ getFlipped move board
+
 

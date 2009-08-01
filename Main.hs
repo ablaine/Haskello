@@ -11,6 +11,7 @@ main :: IO ()
 main = play defaultStart 
 
 defaultStart = GameState othelloBoard X 2 2 4
+
 header = "<<   Haskello   >>"
 
 play :: GameState -> IO a
