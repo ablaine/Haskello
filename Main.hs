@@ -18,7 +18,6 @@ play :: GameState -> IO a
 play env = do
 	let b = board env
 	let s = curTurn env
-	let tPts = "T: " ++ show (totalPts env)
 	system "clear"
 	putStrLn header
 	printScore (darkPts env) (lightPts env)
