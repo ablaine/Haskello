@@ -13,7 +13,7 @@ mkArray f bnds = array bnds [(i, f i) | i <- range bnds]
 
 -- Converts a 2D array to a 2D list of ((x,y),val) pairs
 array2DToList2D :: (Ix i) => Array i (Array i a) -> [[((i, i), a)]]
-array2DToList2D = map (\(x,row) -> handleRow x row) . assocs
+array2DToList2D = map (uncurry handleRow) . assocs
 	where
 		handleRow x = map (\(y,val) -> ((x,y),val)) . assocs
 
@@ -53,16 +53,24 @@ putStrArr = mapM_ (\item -> system $ "echo '" ++ item ++ "'")
 printBoard :: Board -> IO ()
 printBoard = putStrArr . showBoard
 
-printRequestToMakeMove state = system $ "echo '" ++ "Please make your move " ++ player ++ ": \\c'"
-	where
-		player = if state == X then xColor ++ stateToStr state ++ clear else oColor ++ stateToStr state ++ clear
+printRequestToMakeMove :: State -> IO ()
+printRequestToMakeMove state = do
+	system $ "echo '" ++ "Please make your move " ++ player ++ ": \\c'"
+	return ()
+		where
+			player = (if state == X then xPlayer else oPlayer) ++ clear
+			xPlayer = xColor ++ stateToStr state
+			oPlayer = oColor ++ stateToStr state
 
---error when I try to declare type
-printScore x o = system $ "echo '     " ++ xScore ++ spacing ++ oScore ++ "'"
-	where
-		xScore = xColor ++ show x ++ clear
-		oScore = oColor ++ show o ++ clear
-		spacing = "     " ++ if x >= 10 then "" else " "
+printScore :: Int -> Int -> IO ()
+printScore x o = do
+	system $ "echo '     " ++ xScore ++ spacing ++ oScore ++ "'"
+	return ()
+		where
+			xScore = xColor ++ show x ++ clear
+			oScore = oColor ++ show o ++ clear
+			spacing = "    " ++ more
+			more = if x < 10 && o < 10 then "  " else if x < 10 || o < 10 then " " else ""
 
 {- Edit these to one of the below to choose player colors. -}
 xColor = red

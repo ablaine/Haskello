@@ -1,5 +1,5 @@
 module Board
-( board_bounds, board_size, othelloBoard
+( boardBounds, boardSize, othelloBoard
 , makeMove
 , getValidMoves
 , hasValidMove
@@ -16,15 +16,15 @@ import Utils
 import DataTypes
 
 {-- Constants --}
-board_bounds = (0, 7)
-board_size = rangeSize board_bounds
+boardBounds = (0, 7)
+boardSize = rangeSize boardBounds
 
 othelloBoard :: Board
 othelloBoard = flipMult [(3,3),(4,4)] O (flipMult [(3,4),(4,3)] X blankBoard)
 
 blankBoard = mkArray $ mkArray E
 	where
-		mkArray = listArray board_bounds . replicate board_size
+		mkArray = listArray boardBounds . replicate boardSize
 
 listOfDir = [ (a,b) | a <- [-1,0,1], b <- [-1,0,1], a /= 0 || b /= 0 ]
 
@@ -66,7 +66,7 @@ flipSingle b val (x, y) = b // [(y,row)]
 withinBounds :: Point -> Bool
 withinBounds (x, y) = check x && check y
 	where
-		check = inRange board_bounds
+		check = inRange boardBounds
 
 getState :: Point -> Board -> State
 getState (x, y) b = b ! y ! x
