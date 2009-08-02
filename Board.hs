@@ -28,7 +28,7 @@ listOfDir = [ (a,b) | a <- [-1,0,1], b <- [-1,0,1], a /= 0 || b /= 0 ]
 
 {-- Manipulating the board --}
 points :: State -> Board -> Int
-points state = length . filter (==state) . concat . elems2D
+points state = length . filter (\(_,s) -> s == state) . array2DToList
 
 makeMove :: Move -> Board -> Board
 makeMove m@(_,s) b = flipMult (getFlipped m b) s b

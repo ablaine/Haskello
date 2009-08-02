@@ -11,19 +11,15 @@ addPair (a,b) (c,d) = (a+c, b+d)
 mkArray :: (Ix a) => (a -> b) -> (a,a) -> Array a b
 mkArray f bnds = array bnds [(i, f i) | i <- range bnds]
 
--- Converts a 2D Array into a 2D list of it's elements.
-elems2D :: (Ix i, Ix a) => Array a (Array i e) -> [[e]]
-elems2D arr = map (\i -> elems $ arr ! i) . range $ bounds arr
-
--- Performs 'map' over an array. Function expects the tuple (index,value) but should only return the new value.
-mapArray :: (Ix i) => ((i, a) -> b) -> Array i a -> Array i b
-mapArray f arr = array (bounds arr) $ map (\(index,value) -> (index,f (index,value))) $ assocs arr
-
--- Similar to mapArray except performed on a 2d array of arrays. Function expects ((x,y),value) but you should only return the new value.
-mapArray2D :: (Ix i) => (((i, i), a) -> b) -> Array i (Array i a) -> Array i (Array i b)
-mapArray2D f arr = array (bounds arr) $ map (\(x,rArr) -> (x,handleRow (x,rArr))) $ assocs arr
+-- Converts a 2D array to a 2D list of ((x,y),val) pairs
+array2DToList2D :: (Ix i) => Array i (Array i a) -> [[((i, i), a)]]
+array2DToList2D = map (\(x,row) -> handleRow x row) . assocs
 	where
-		handleRow (x,rArr) = array (bounds rArr) $ map (\(y,value) -> (y,f ((x,y),value))) $ assocs rArr
+		handleRow x = map (\(y,val) -> ((x,y),val)) . assocs
+
+-- Converts a 2D array to a list of ((x,y),val) pairs
+array2DToList :: (Ix i) => Array i (Array i a) -> [((i, i), a)]
+array2DToList = concat . array2DToList2D
 
 {- State -}
 oppState :: State -> State
@@ -38,9 +34,9 @@ stateToStr E = "Empty"
 
 {- Board representations -}
 boardToArr :: Board -> [String]
-boardToArr = map handleRow . elems2D
+boardToArr = map handleRow . array2DToList2D
 	where
-		handleRow = concatMap (\i -> if i == E then " ." else if i == O then o else x)
+		handleRow = concatMap (\(_,i) -> if i == E then " ." else if i == O then o else x)
 			where
 				x = " " ++ xColor ++ "x" ++ clear
 				o = " " ++ oColor ++ "o" ++ clear
