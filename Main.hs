@@ -35,9 +35,9 @@ play env = do
 			printScore (darkPts env) (lightPts env)
 			printBoard (board env)
 			putStr "\n"
-		requestMove player = do
+		requestMove playerState = do
 			let b = board env
-			let s = player
+			let s = playerState
 			let s' = oppState s
 			printRequestToMakeMove s
 			move <- getNextMove s b
