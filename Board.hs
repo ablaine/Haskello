@@ -1,6 +1,7 @@
 module Board
 ( board_bounds, board_size, othelloBoard
 , makeMove
+, getValidMoves
 , withinBounds
 , getState
 , isValidMove
@@ -75,4 +76,6 @@ isValidMove move board = open && flips
 		open = (\(m,s) -> getState m board == E) move
 		flips = not . null $ getFlipped move board
 
+getValidMoves :: State -> Board -> [Point]
+getValidMoves state board = map fst $ filter snd $ map (\(m,_) -> (m,isValidMove (m,state) board)) $ array2DToList board
 
