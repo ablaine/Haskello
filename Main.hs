@@ -12,20 +12,35 @@ main = play defaultStart
 
 defaultStart = GameState othelloBoard X 2 2 4
 
-header = "<<   Haskello   >>"
-
-play :: GameState -> IO a
 play env = do
 	let b = board env
 	let s = curTurn env
-	system "clear"
-	putStrLn header
-	printScore (darkPts env) (lightPts env)
-	printBoard b
-	printRequestToMakeMove s
-	move <- getNextMove s b
-	let board' = makeMove (move, s) b
-	let nextTurn = oppState s
-	play $ GameState board' nextTurn (points X board') (points O board') . succ $ totalPts env
-
+	let s' = oppState s
+	if hasValidMove s b
+		then do
+			refreshScreen
+			requestMove s
+		else if hasValidMove s' b
+			then do
+				refreshScreen
+				putStrLn $ stateToStr s ++ " was unable to make any move."
+				requestMove s'
+			else do
+				refreshScreen
+				putStrLn "Game is over!"
+	where
+		refreshScreen = do
+			system "clear"
+			putStrLn "<<   Haskello   >>"
+			printScore (darkPts env) (lightPts env)
+			printBoard (board env)
+			putStr "\n"
+		requestMove player = do
+			let b = board env
+			let s = player
+			let s' = oppState s
+			printRequestToMakeMove s
+			move <- getNextMove s b
+			let b' = makeMove (move, s) b
+			play $ GameState b' s' (points X b') (points O b') . succ $ totalPts env
 

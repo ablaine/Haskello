@@ -53,7 +53,7 @@ putStrArr = mapM_ (\item -> system $ "echo '" ++ item ++ "'")
 printBoard :: Board -> IO ()
 printBoard = putStrArr . showBoard
 
-printRequestToMakeMove state = system $ "echo '" ++ "\nPlease make your move " ++ player ++ ": \\c'"
+printRequestToMakeMove state = system $ "echo '" ++ "Please make your move " ++ player ++ ": \\c'"
 	where
 		player = if state == X then xColor ++ stateToStr state ++ clear else oColor ++ stateToStr state ++ clear
 
